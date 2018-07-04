@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_my_app/GoogleSignIn.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
-import 'package:flutter_my_app/Add.dart';
+import 'package:flutter_my_app/view/Add.dart';
 import 'package:flutter_my_app/Item.dart';
 
 final reference = FirebaseDatabase.instance.reference().child('todo');
 
+// メイン画面
 class ItemListView extends StatefulWidget {
   @override
   createState() => new ItemListViewState();
 }
 
-// メインページ
 // Itemリストを表示する
 class ItemListViewState extends State<ItemListView> {
   final List<Item> items = <Item>[];

@@ -5,17 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_my_app/GoogleSignIn.dart';
-import 'package:flutter_my_app/ItemList.dart';
+import 'package:flutter_my_app/view/ItemList.dart';
+import 'package:flutter_my_app/ItemSearchResult.dart';
+import 'package:firebase_database/firebase_database.dart';
 
+final reference = FirebaseDatabase.instance.reference().child('todo');
+
+// アイテム追加画面
 class AddView extends StatefulWidget {
   @override
   createState() => new AddViewState();
 }
 
 class AddViewState extends State<AddView> {
+  List<ItemSearchResult> _itemSearchResult;
 
   final TextEditingController _textController = new TextEditingController();
   final TextEditingController _textController2 = new TextEditingController();
+  final TextEditingController _textController3 = new TextEditingController();
+  final TextEditingController _textController4 = new TextEditingController();
+  final TextEditingController _textController5 = new TextEditingController();
+  final TextEditingController _textController6 = new TextEditingController();
+  final TextEditingController _textController7 = new TextEditingController();
   String gazou = null;
 
   @override
@@ -24,6 +35,7 @@ class AddViewState extends State<AddView> {
       appBar: new AppBar(
         title: new Text('Add Buy List'),
         actions: <Widget>[
+          // アイテム追加処理を行うボタンを配置
           new FlatButton(
             onPressed: _handlePushAdd,
             child: new Text('ADD', style: new TextStyle(fontSize: 32.0)),
@@ -50,13 +62,9 @@ class AddViewState extends State<AddView> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 new Text('Picture'),
-                gazou != null ?
-                new Image.network(gazou) :
-                new Image.asset(
-                  'images/lake.jpg',
-                  width: 40.0,
-                  height: 40.0,
-                ),
+                // 画像を取得できたら表示、できなかったらダミー画像を表示
+                gazou != null ? new Image.network(gazou)
+                    : new Image.asset('images/lake.jpg', width: 40.0, height: 40.0,),
               ],
             ),
           ),
@@ -88,7 +96,7 @@ class AddViewState extends State<AddView> {
                         controller: _textController2,
                         onSubmitted: null,
                         decoration:
-                        new InputDecoration(hintText: 'How many',labelText: 'How many1')
+                        new InputDecoration(hintText: 'Number',labelText: 'Number')
                     )
                 ),
               ],
@@ -100,10 +108,10 @@ class AddViewState extends State<AddView> {
                 new Flexible(
                     child: new TextField(
                         style: new TextStyle(fontSize: 32.0, color: Colors.black),
-                        controller: _textController2,
+                        controller: _textController3,
                         onSubmitted: null,
                         decoration:
-                        new InputDecoration(hintText: 'How many',labelText: 'How many2')
+                        new InputDecoration(hintText: 'Hyouka',labelText: 'Hyouka')
                     )
                 ),
               ],
@@ -115,10 +123,10 @@ class AddViewState extends State<AddView> {
                 new Flexible(
                     child: new TextField(
                         style: new TextStyle(fontSize: 32.0, color: Colors.black),
-                        controller: _textController2,
+                        controller: _textController4,
                         onSubmitted: null,
                         decoration:
-                        new InputDecoration(hintText: 'How many',labelText: 'How many3')
+                        new InputDecoration(hintText: 'PublishedDate',labelText: 'PublishedDate')
                     )
                 ),
               ],
@@ -130,10 +138,10 @@ class AddViewState extends State<AddView> {
                 new Flexible(
                     child: new TextField(
                         style: new TextStyle(fontSize: 32.0, color: Colors.black),
-                        controller: _textController2,
+                        controller: _textController5,
                         onSubmitted: null,
                         decoration:
-                        new InputDecoration(hintText: 'How many',labelText: 'How many4')
+                        new InputDecoration(hintText: 'Memo',labelText: 'Memo')
                     )
                 ),
               ],
@@ -145,10 +153,10 @@ class AddViewState extends State<AddView> {
                 new Flexible(
                     child: new TextField(
                         style: new TextStyle(fontSize: 32.0, color: Colors.black),
-                        controller: _textController2,
+                        controller: _textController6,
                         onSubmitted: null,
                         decoration:
-                        new InputDecoration(hintText: 'How many',labelText: 'How many5')
+                        new InputDecoration(hintText: 'Category',labelText: 'Category')
                     )
                 ),
               ],
@@ -160,10 +168,10 @@ class AddViewState extends State<AddView> {
                 new Flexible(
                     child: new TextField(
                         style: new TextStyle(fontSize: 32.0, color: Colors.black),
-                        controller: _textController2,
+                        controller: _textController7,
                         onSubmitted: null,
                         decoration:
-                        new InputDecoration(hintText: 'How many',labelText: 'How many6')
+                        new InputDecoration(hintText: 'Group',labelText: 'Group')
                     )
                 ),
               ],
@@ -176,10 +184,26 @@ class AddViewState extends State<AddView> {
 
   void _handleSubmitted(String text) async {
     await fetchItemSearchResult(new http.Client()).then((result) {
-
+      setState(() {
+        _itemSearchResult = result;
+      });
     });
+//    final result = await Navigator.push(
+//      context,
+//      new MaterialPageRoute(builder: (context) => new SearchResultView(itemSearchResult2: _itemSearchResult2)),
+//    );
+//
+//    setState(
+//            () {
+//          _textController.text = result[0] != null ? result[0] : 'No Picture';
+//          _textController2.text = result[1] != null ? result[1] : '';
+//          gazou = result[2] != null ? result[2] : null;
+//        }
+//    );
   }
+
   Future<Null> _handlePushAdd() async {
+//    await testSignInWithGoogle();
     await ensureLoggedIn();
     _pushAdd();
   }
@@ -202,46 +226,46 @@ class AddViewState extends State<AddView> {
   }
 }
 
-class ItemSearchResult {
-  String title;
-  String thumbnailUrl;
-  String authors;
-  String publisher;
-  String publishedDate;
-  String number;
-
-  ItemSearchResult({this.title, this.thumbnailUrl, this.authors, this.publisher, this.publishedDate, this.number});
-
-  static fromJson(jsonV) {
-    final data = json.decode(jsonV);
-    List<Map<String, Object>> itemList = data['items'];
-
-
-    return itemList.map((item) {
-      final itemSearchResult = new ItemSearchResult();
-      Map<String, Object> volumeInfoMap = item['volumeInfo'];
-      Map<String, Object> urlMap = volumeInfoMap['imageLinks'];
-      Map<String, Object> seriesInfoMap = volumeInfoMap['seriesInfo'];
-      List<String> authorsList = seriesInfoMap != null ? seriesInfoMap['authors'] : null;
-
-      itemSearchResult.title = volumeInfoMap['title'];
-//      itemSearchResult.authors = volumeInfoMap['authors'];
-      itemSearchResult.publisher = authorsList != null ? authorsList[0] : null;
-      itemSearchResult.publishedDate = volumeInfoMap['publishedDate'];
-      itemSearchResult.thumbnailUrl = urlMap != null ? urlMap['smallThumbnail'] : null;
-      itemSearchResult.number = seriesInfoMap != null ? seriesInfoMap['bookDisplayNumber'] : null;
-
-      return itemSearchResult;
-    }).toList();
-  }
-}
-
-Future<List<ItemSearchResult>> fetchItemSearchResult(http.Client client) async {
-  final response =
-  await client.get('https://www.googleapis.com/books/v1/volumes?q=one+piece');
-
-  return compute(parseItemSearchResult, response.body);
-}
-List<ItemSearchResult> parseItemSearchResult(String responseBody) {
-  return ItemSearchResult.fromJson(responseBody);
-}
+//class ItemSearchResult {
+//  String title;
+//  String thumbnailUrl;
+//  String authors;
+//  String publisher;
+//  String publishedDate;
+//  String number;
+//
+//  ItemSearchResult({this.title, this.thumbnailUrl, this.authors, this.publisher, this.publishedDate, this.number});
+//
+//  static fromJson(jsonV) {
+//    final data = json.decode(jsonV);
+//    List<Map<String, Object>> itemList = data['items'];
+//
+//
+//    return itemList.map((item) {
+//      final itemSearchResult = new ItemSearchResult();
+//      Map<String, Object> volumeInfoMap = item['volumeInfo'];
+//      Map<String, Object> urlMap = volumeInfoMap['imageLinks'];
+//      Map<String, Object> seriesInfoMap = volumeInfoMap['seriesInfo'];
+//      List<String> authorsList = seriesInfoMap != null ? seriesInfoMap['authors'] : null;
+//
+//      itemSearchResult.title = volumeInfoMap['title'];
+////      itemSearchResult.authors = volumeInfoMap['authors'];
+//      itemSearchResult.publisher = authorsList != null ? authorsList[0] : null;
+//      itemSearchResult.publishedDate = volumeInfoMap['publishedDate'];
+//      itemSearchResult.thumbnailUrl = urlMap != null ? urlMap['smallThumbnail'] : null;
+//      itemSearchResult.number = seriesInfoMap != null ? seriesInfoMap['bookDisplayNumber'] : null;
+//
+//      return itemSearchResult;
+//    }).toList();
+//  }
+//}
+//
+//Future<List<ItemSearchResult>> fetchItemSearchResult(http.Client client) async {
+//  final response =
+//  await client.get('https://www.googleapis.com/books/v1/volumes?q=one+piece');
+//
+//  return compute(parseItemSearchResult, response.body);
+//}
+//List<ItemSearchResult> parseItemSearchResult(String responseBody) {
+//  return ItemSearchResult.fromJson(responseBody);
+//}
